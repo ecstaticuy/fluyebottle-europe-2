@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluye Bottle — Dashboard Análisis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 1px solid #333333;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 134, 176, 0.15);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #006eb8;
+            letter-spacing: -1px;
+        }
+
+        .logo p {
+            font-size: 14px;
+            color: #888888;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #999999;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #1a1a1a;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #006eb8;
+            background-color: #0d0d0d;
+            box-shadow: 0 0 0 3px rgba(0, 110, 184, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #006eb8;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #005a97;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 110, 184, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            width: 100%;
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .dashboard-container.show {
+            display: block;
+        }
+
+        .dashboard-header {
+            max-width: 1200px;
+            margin: 0 auto 60px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 36px;
+            margin-bottom: 12px;
+            color: #006eb8;
+        }
+
+        .dashboard-header p {
+            font-size: 14px;
+            color: #888888;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            background-color: #333333;
+            color: #ffffff;
+            border: 1px solid #444444;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #444444;
+            border-color: #555555;
+        }
+
+        .analyses-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .analysis-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .analysis-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #006eb8, #00d4ff);
+        }
+
+        .analysis-card:hover {
+            border-color: #006eb8;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 110, 184, 0.2);
+        }
+
+        .analysis-date {
+            font-size: 12px;
+            color: #888888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .analysis-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .analysis-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #006eb8;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .analysis-description {
+            font-size: 13px;
+            color: #aaaaaa;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .analysis-metrics {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #666666;
+            border-top: 1px solid #333333;
+            padding-top: 12px;
+        }
+
+        .analysis-metric {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .analysis-metric-label {
+            color: #888888;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .analysis-metric-value {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state h3 {
+            color: #888888;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #666666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+            .login-box {
+                margin: 20px;
+                padding: 30px;
+            }
+
+            .logo h1 {
+                font-size: 24px;
+            }
+
+            .logout-btn {
+                top: 10px;
+                right: 10px;
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            .dashboard-header {
+                margin-bottom: 40px;
+            }
+
+            .dashboard-header h2 {
+                font-size: 24px;
+            }
+
+            .analyses-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <div class="logo">
+                <h1>FLUYE</h1>
+                <p>Paid Media Analytics Dashboard</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Ingresa la contraseña"
+                        autocomplete="off"
+                    >
+                </div>
+                <button type="submit">Acceder</button>
+                <div class="error-message" id="errorMessage">
+                    Contraseña incorrecta
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD SCREEN -->
+    <div class="dashboard-container" id="dashboardContainer">
+        <button class="logout-btn" onclick="handleLogout()">Cerrar sesión</button>
+
+        <div class="dashboard-header">
+            <h2>Dashboard de Análisis</h2>
+            <p>Meta Ads & Performance Metrics</p>
+        </div>
+
+        <div class="analyses-grid" id="analysesGrid">
+            <!-- Analysis cards will be generated here -->
+        </div>
+    </div>
+
+    <script>
+        // Analysis data
+        const analyses = [
+            {
+                id: 'meta-ads-2026-04-09',
+                date: '2026-04-09',
+                title: 'Meta Ads Performance',
+                type: 'Meta Ads',
+                description: 'Análisis completo de campañas, adsets y creativos. Incluye breakdowns por placement, device y periodo.',
+                metrics: {
+                    spend: '€220.41',
+                    roas: '0.28x',
+                    cac: '€110.20'
+                },
+                file: '2026-04-09_meta-ads-performance.html'
+            }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+        });
+
+        function checkAuthStatus() {
+            const isAuthenticated = localStorage.getItem('fluye_authenticated');
+            if (isAuthenticated === 'true') {
+                showDashboard();
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (password === 'Fluye2026') {
+                localStorage.setItem('fluye_authenticated', 'true');
+                errorMessage.classList.remove('show');
+                showDashboard();
+            } else {
+                errorMessage.classList.add('show');
+                document.getElementById('password').value = '';
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('dashboardContainer').classList.add('show');
+            renderAnalyses();
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('fluye_authenticated');
+            document.getElementById('dashboardContainer').classList.remove('show');
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('password').value = '';
+        }
+
+        function renderAnalyses() {
+            const grid = document.getElementById('analysesGrid');
+
+            if (analyses.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <h3>No hay análisis disponibles aún</h3>
+                        <p>Los análisis aparecerán aquí cuando estén listos</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = analyses.map(analysis => `
+                <div class="analysis-card" onclick="openAnalysis('${analysis.file}')">
+                    <div class="analysis-date">${formatDate(analysis.date)}</div>
+                    <div class="analysis-title">${analysis.title}</div>
+                    <div class="analysis-type">${analysis.type}</div>
+                    <div class="analysis-description">${analysis.description}</div>
+                    <div class="analysis-metrics">
+                        <div class="analysis-metric">
+                            <div class="analysis-metric-label">Gasto</div>
+                            <div class="analysis-metric-value">${analysis.metrics.spend}</div>
+                        </div>
+                        <div class="analysis-metric">
+                            <div class="analysis-metric-label">ROAS</div>
+                            <div class="analysis-metric-value">${analysis.metrics.roas}</div>
+                        </div>
+                        <div class="analysis-metric">
+                            <div class="analysis-metric-label">CAC</div>
+                            <div class="analysis-metric-value">${analysis.metrics.cac}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAnalysis(filename) {
+            window.location.href = filename;
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('es-ES', options);
+        }
+
+        // Keyboard shortcut for testing: press 'F' to auto-login (remove in production)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'f' && e.ctrlKey) {
+                e.preventDefault();
+                document.getElementById('password').value = 'Fluye2026';
+            }
+        });
+    </script>
+</body>
+</html>
